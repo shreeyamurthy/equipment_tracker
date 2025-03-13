@@ -159,89 +159,91 @@ const login = async (req, res) => {
 
 
   const updateRole = async (req, res) => {
-    const { action } = req.body;
-    const { employee_id } = req.query;
+    // const { action } = req.body;
+    // const { employee_id } = req.query;
   
-    // Validate input
-    if (!employee_id || !action) {
-      return res.status(400).json({ error: 'Employee ID and action are required' });
-    }
+    // // Validate input
+    // if (!employee_id || !action) {
+    //   return res.status(400).json({ error: 'Employee ID and action are required' });
+    // }
   
-    // Fetch the user's email and selected role
-    const fetchUserQuery = `
-      SELECT email, selected_role FROM scompany_users
-      WHERE employee_id = @employee_id
-    `;
-    const request = new sql.Request();
-    request.input('employee_id', sql.NVarChar, employee_id);
+    // // Fetch the user's email and selected role
+    // const fetchUserQuery = `
+    //   SELECT email, selected_role FROM scompany_users
+    //   WHERE employee_id = @employee_id
+    // `;
+    // const request = new sql.Request();
+    // request.input('employee_id', sql.NVarChar, employee_id);
   
-    try {
-      const userResult = await request.query(fetchUserQuery);
-      if (userResult.recordset.length === 0) {
-        return res.status(404).json({ error: 'User not found' });
-      }
+    // try {
+    //   const userResult = await request.query(fetchUserQuery);
+    //   if (userResult.recordset.length === 0) {
+    //     return res.status(404).json({ error: 'User not found' });
+    //   }
   
-      const userEmail = userResult.recordset[0].email;
-      const selectedRole = userResult.recordset[0].selected_role;
+    //   const userEmail = userResult.recordset[0].email;
+    //   const selectedRole = userResult.recordset[0].selected_role;
   
-      let assignedRole = 'Pending';
-      let emailSubject = '';
-      let emailText = '';
+    //   let assignedRole = 'Pending';
+    //   let emailSubject = '';
+    //   let emailText = '';
   
-      if (action === 'assign') {
-        assignedRole = selectedRole;
-        emailSubject = 'Role Assignment Notification';
-        emailText = `You have been successfully assigned the role of ${assignedRole}.You can login now.`;
-      } else if (action === 'decline') {
-        emailSubject = 'Role Assignment Declined';
-        emailText = 'Your role assignment request has been declined.';
-      } else {
-        return res.status(400).json({ error: 'Invalid action' });
-      }
+    //   if (action === 'assign') {
+    //     assignedRole = selectedRole;
+    //     emailSubject = 'Role Assignment Notification';
+    //     emailText = `You have been successfully assigned the role of ${assignedRole}.You can login now.`;
+    //   } else if (action === 'decline') {
+    //     emailSubject = 'Role Assignment Declined';
+    //     emailText = 'Your role assignment request has been declined.';
+    //   } else {
+    //     return res.status(400).json({ error: 'Invalid action' });
+    //   }
   
-      // Update the assigned role if action is 'assign'
-      if (action === 'assign') {
-        const updateRoleQuery = `
-          UPDATE scompany_users
-          SET assigned_role = @assigned_role
-          WHERE employee_id = @employee_id
-        `;
-        request.input('assigned_role', sql.NVarChar, assignedRole);
-        await request.query(updateRoleQuery);
-      }
+    //   // Update the assigned role if action is 'assign'
+    //   if (action === 'assign') {
+    //     const updateRoleQuery = `
+    //       UPDATE scompany_users
+    //       SET assigned_role = @assigned_role
+    //       WHERE employee_id = @employee_id
+    //     `;
+    //     request.input('assigned_role', sql.NVarChar, assignedRole);
+    //     await request.query(updateRoleQuery);
+    //   }
   
-      // Send email notification
-    //   const transporter = nodemailer.createTransport({
-    //     host: 'smtp.gmail.com',
-    //     port: 587,
-    //     secure: false,// true for 465, false for other ports
-    //     auth: {
-    //       user: process.env.EMAIL_USER,
-    //       pass: process.env.EMAIL_PASS
-    //     },
-    //     tls: {
-    //       rejectUnauthorized: false
-    //     }
-    //   });
+    //   Send email notification
+      const transporter = nodemailer.createTransport({
+        host: 'smtp.gmail.com',
+        port: 587,
+        secure: false,// true for 465, false for other ports
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS
+        },
+        connectionTimeout:30000,
+        tls: {
+          rejectUnauthorized: false
+        }
+      });
   
-    //   const mailOptions = {
-    //     from: process.env.EMAIL_USER,
-    //     to: userEmail,
-    //     subject: emailSubject,
-    //     text: emailText
-    //   };
+      const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: "murthyshreeya@gmail.com",
+        subject: "hiiiii",
+        text: "helooo"
+      };
   
-    //   transporter.sendMail(mailOptions, (error, info) => {
-    //     if (error) {
-    //       return res.status(500).json({ error: 'Error sending email: ' + error.message });
-    //     }
-    //     res.status(200).json({ message: 'Action completed and email sent successfully' });
-    //   });
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          return res.status(500).json({ error: 'Error sending email: ' + error.message });
+        }
+        res.status(200).json({ message: 'Action completed and email sent successfully' });
+      });
     
-    res.status(200).json({ message: 'Action completed successfully' });
-    } catch (err) {
-      res.status(500).json({ error: 'Server error: ' + err.message });
-    }
+    // res.status(200).json({ message: 'Action completed successfully' });
+    // } 
+    // catch (err) {
+    //   res.status(500).json({ error: 'Server error: ' + err.message });
+    // }
   };
   
 

@@ -36,13 +36,13 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'oklch(0.869 0.022 252.894)' }}>
+    <div className="min-h-screen flex items-center justify-center" >
       <div className="flex flex-col md:flex-row items-center justify-center w-full max-w-5xl p-8">
         <div className="md:w-1/2 mb-8 md:mb-0">
           <img src="/equipment_logo.png" alt="Register" className="w-full h-auto" />
         </div>
-        <div className="md:w-1/2 md:ml-16 bg-white p-8 rounded shadow-md">
-          <h2 className="text-2xl font-bold mb-6 text-center" style={{ color: 'oklch(0.777 0.152 181.912)' }}>Register</h2>
+        <div className="md:w-1/2 md:ml-16 bg-white p-8 rounded-lg shadow-md" style={{ backgroundColor: 'oklch(0.869 0.022 252.894)'}}>
+          <h2 className="text-2xl font-bold mb-6 text-center" >Register</h2>
           {error && <p className="text-red-500 mb-4">{error}</p>}
           {success && <p className="text-green-500 mb-4">{success}</p>}
           <form onSubmit={handleSubmit}>
@@ -107,13 +107,13 @@ const Register = () => {
             </div>
             <button
               type="submit"
-              className="w-full py-2 rounded"
-              style={{ backgroundColor: 'oklch(0.777 0.152 181.912)', color: '#FFFFFF' }}
+              className="w-full py-2 rounded transform transition-transform duration-200 hover:scale-105"
+              style={{ backgroundColor: 'oklch(0.685 0.169 237.323)', color: '#FFFFFF' }}
             >
               Register
             </button>
           </form>
-          <p className="mt-4">
+          <p className="mt-4 text-center">
             Already have an account? <a href="/login" className="text-blue-500 hover:underline">Login</a>
           </p>
         </div>

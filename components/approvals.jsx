@@ -39,10 +39,10 @@ const Approvals = () => {
   return (
     <div className="flex justify-center">
       <div className="w-3/4">
-        <h1 className="text-2xl font-bold mb-4">Pending Approvals</h1>
+        <h1 className="text-2xl text-white font-bold mb-4">Pending Approvals</h1>
         <div className="space-y-4">
           {pendingUsers.map((user) => (
-            <div key={user.id} className="bg-white p-4 rounded shadow-md border border-gray-200">
+            <div key={user.id} className="p-4 rounded-lg shadow-md border border-gray-200" style={{ backgroundColor: 'oklch(0.869 0.022 252.894)'}}>
               <h2 className="text-xl font-semibold mb-2">{user.name}</h2>
               <p className="text-gray-600 mb-1"><strong>Email:</strong> {user.email}</p>
               <p className="text-gray-600 mb-1"><strong>Employee ID:</strong> {user.employee_id}</p>

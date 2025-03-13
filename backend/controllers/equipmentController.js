@@ -20,6 +20,20 @@ const fetchEquipment = async (req, res) => {
       res.status(500).json({ error: err.message });
     }
   };
+  const fetchEquipDetail= async (req, res) => {
+  try {
+    // console.log("entered fetchequipdetail");
+    const { id } = req.params;
+    // console.log(id);
+    const result = await sql.query`SELECT * FROM scompany_equipment WHERE id = ${id}`;
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: 'Equipment not found' });
+    }
+    res.json(result.recordset[0]);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching equipment details' });
+  }
+};
   
 
 const createEquipment = async (req, res) => {
@@ -43,4 +57,4 @@ const createEquipment = async (req, res) => {
   }
 };
 
-module.exports = { fetchEquipment, createEquipment };
+module.exports = { fetchEquipment, createEquipment ,fetchEquipDetail};
