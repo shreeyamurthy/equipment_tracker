@@ -32,21 +32,27 @@ const Navbar = () => {
       <div className="flex items-center space-x-4">
         <button
           onClick={handleDashboardClick}
-          className="text-white text-bold transform transition-transform duration-200 hover:text-oklch hover:underline hover:scale-105"
+          className=" text-bold transform transition-transform duration-200 hover:text-oklch hover:underline hover:scale-105"
         >
           Dashboard
         </button>
         <button
           onClick={handleApprovalsClick}
-          className="text-white text-bold transform transition-transform duration-200 hover:text-oklch hover:underline hover:scale-105"
+          className=" text-bold transform transition-transform duration-200 hover:text-oklch hover:underline hover:scale-105"
         >
           Approvals
         </button>
         <button
           onClick={() => router.push('/equipment')}
-          className="text-white text-bold transform transition-transform duration-200 hover:text-oklch hover:underline hover:scale-105"
+          className=" text-bold transform transition-transform duration-200 hover:text-oklch hover:underline hover:scale-105"
         >
           Equipment
+        </button>
+        <button
+          onClick={() => router.push('/tasks')}
+          className=" text-bold transform transition-transform duration-200 hover:text-oklch hover:underline hover:scale-105"
+        >
+          Tasks
         </button>
       </div>
       <div className="relative">

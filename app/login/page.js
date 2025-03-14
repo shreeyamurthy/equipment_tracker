@@ -52,7 +52,7 @@ const Login = () => {
         <div className="md:w-1/2 mb-8 md:mb-0">
           <img src="/equipment_logo.png" alt="Login" className="w-full h-auto" />
         </div>
-        <div className="md:w-1/2 md:ml-16 bg-white p-8 rounded-lg shadow-md" style={{ backgroundColor: 'oklch(0.869 0.022 252.894)'}}>
+        <div className="md:w-1/2 md:ml-16 bg-white p-8 rounded-lg shadow-md" style={{ backgroundColor: 'oklch(0.985 0.001 106.423)'}}>
           <h2 className="text-2xl font-bold mb-6 text-center" >Login</h2>
           {error && <p className="text-red-500 mb-4">{error}</p>}
           {success && <p className="text-green-500 mb-4">{success}</p>}

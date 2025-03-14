@@ -2,77 +2,204 @@ const sql = require('mssql');
 const ExcelJS = require('exceljs');
 const db = require('../config/db');
 
-const submitMaintenanceLog = async (req, res) => {
-    const { equipment_id, technician_name, maintenance_date, maintenance_type, issues_found, notes, status, maintenance_interval } = req.body;
-    const sqlQuery = `
-      INSERT INTO maintenance_logs (equipment_id, technician_id, technician_name, maintenance_date, maintenance_type, issues_found, notes, status)
-      VALUES (@equipment_id, @technician_id, @technician_name, @maintenance_date, @maintenance_type, @issues_found, @notes, @status)
-    `;
-  
-    const updateEquipmentQuery = `
-      UPDATE equipment
-      SET previous_maintenance_date = @maintenance_date, next_maintenance_date = DATEADD(day, @maintenance_interval, @maintenance_date)
-      WHERE id = @equipment_id
-    `;
-  
-    try {
-      const request = new sql.Request();
-      request.input('equipment_id', sql.Int, equipment_id);
-      request.input('technician_id', sql.Int, req.user.id);
-      request.input('technician_name', sql.NVarChar, technician_name);
-      request.input('maintenance_date', sql.Date, maintenance_date);
-      request.input('maintenance_type', sql.NVarChar, maintenance_type);
-      request.input('issues_found', sql.NVarChar, issues_found);
-      request.input('notes', sql.NVarChar, notes);
-      request.input('status', sql.NVarChar, status);
-      request.input('maintenance_interval', sql.Int, maintenance_interval);
-  
-      // Start a transaction
-      const transaction = new sql.Transaction();
-      await transaction.begin();
-  
-      // Insert maintenance log
-      const logRequest = new sql.Request(transaction);
-      await logRequest.query(sqlQuery);
-  
-      // Update equipment maintenance dates
-      const equipmentRequest = new sql.Request(transaction);
-      await equipmentRequest.query(updateEquipmentQuery);
-  
-      // Commit the transaction
-      await transaction.commit();
-  
-      res.status(201).json({ message: 'Maintenance log submitted and equipment maintenance dates updated' });
-    } catch (err) {
-      res.status(500).json({ message: 'Maintenance log submission failed .Please submit it again',error: err.message });
+
+
+const getScheduledMaintenance = async (req, res) => {
+    const { id } = req.params;
+
+    if (!id) {
+        return res.status(400).json({ error: 'Missing equipment ID' });
     }
-  };
 
-const generateReport = async (req, res) => {
-  const sqlQuery = 'SELECT * FROM maintenance_logs';
+    const query = `
+        SELECT scheduled_date, task, description
+        FROM equipment_maintenance
+        WHERE equipment_id = @id AND status = 'Scheduled'
+    `;
 
-  try {
-    const request = new sql.Request();
-    const result = await request.query(sqlQuery);
+    try {
+        const request = new sql.Request();
+        const result = await request
+            .input('id', sql.Int, id)
+            .query(query);
 
-    const workbook = new ExcelJS.Workbook();
-    const sheet = workbook.addWorksheet('Maintenance Logs');
-    sheet.columns = [
-      { header: 'Equipment ID', key: 'equipment_id' },
-      { header: 'Technician ID', key: 'technician_id' },
-      { header: 'Date', key: 'maintenance_date' },
-      { header: 'Type', key: 'maintenance_type' },
-      { header: 'Issues Found', key: 'issues_found' },
-      { header: 'Status', key: 'status' }
-    ];
-    result.recordset.forEach(log => sheet.addRow(log));
-
-    res.setHeader('Content-Disposition', 'attachment; filename=report.xlsx');
-    await workbook.xlsx.write(res);
-    res.end();
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+        res.status(200).json(result.recordset);
+    } catch (err) {
+        console.error('Fetch Scheduled Maintenance Error:', err);
+        res.status(500).json({ error: 'Failed to fetch scheduled maintenance' });
+    }
 };
 
-module.exports = { submitMaintenanceLog, generateReport };
+const getDetailTasks = async (req, res) => {
+    const {  id,date } = req.params;
+
+    if (!date || !id) {
+        return res.status(400).json({ error: 'Missing required query parameters' });
+    }
+
+    // Parse and validate the date
+    const parsedDate = new Date(date);
+    if (isNaN(parsedDate.getTime())) {
+        return res.status(400).json({ error: 'Invalid date format' });
+    }
+
+    const query = `
+       SELECT 
+    em.task,
+    em.description,
+    em.status,
+    se.technician_name,
+    su.email
+FROM 
+    equipment_maintenance em
+JOIN 
+    scompany_equipment se ON em.equipment_id = se.id
+JOIN 
+    scompany_users su ON se.technician_id = su.id
+WHERE 
+    em.scheduled_date = @date 
+    AND em.equipment_id = @id
+    `;
+
+    try {
+        const request = new sql.Request();
+        const result = await request
+            .input('date', sql.Date, parsedDate)
+            .input('id', sql.Int, id)
+            .query(query);
+
+        res.status(200).json(result.recordset);
+    } catch (err) {
+        console.error('Error fetching maintenance tasks:', err);
+        res.status(500).json({ error: 'Failed to fetch maintenance tasks' });
+    }
+};
+
+const getTasksByTechnician = async (req, res) => {
+    const { id } = req.params;
+
+    if (!id) {
+        return res.status(400).json({ error: 'Missing required path parameter: technicianId' });
+    }
+
+    const query = `
+        SELECT 
+            em.id,
+            em.task,
+            em.description,
+            em.status,
+            em.scheduled_date,
+            se.name,
+            se.type,
+            se.serial_number,
+            sm.name AS manager_name,
+            sm.email AS manager_email
+        FROM 
+            equipment_maintenance em
+        JOIN 
+            scompany_equipment se ON em.equipment_id = se.id
+        JOIN 
+            scompany_users su ON se.technician_id = su.id
+        JOIN 
+            scompany_users sm ON se.manager_id = sm.id
+        WHERE 
+            su.id = @id and em.status='Scheduled'
+    `;
+
+    try {
+        const request = new sql.Request();
+        const result = await request
+            .input('id', sql.Int, id)
+            .query(query);
+
+        res.status(200).json(result.recordset);
+    } catch (err) {
+        console.error('Error fetching tasks:', err);
+        res.status(500).json({ error: 'Failed to fetch tasks' });
+    }
+};
+
+
+const getTaskCalendar = async (req, res) => {
+    const { id } = req.params;
+
+    if (!id) {
+        return res.status(400).json({ error: 'Missing required path parameter: id' });
+    }
+
+    const query = `
+        SELECT 
+            em.task,
+            em.scheduled_date,
+            se.name,
+            se.type,
+            se.serial_number
+        FROM 
+            equipment_maintenance em
+        JOIN 
+            scompany_equipment se ON em.equipment_id = se.id
+        JOIN 
+            scompany_users su ON se.technician_id = su.id
+        WHERE 
+            su.id = @id AND em.status = 'Scheduled'
+    `;
+
+    try {
+        const request = new sql.Request();
+        const result = await request
+            .input('id', sql.Int, id)
+            .query(query);
+
+        res.status(200).json(result.recordset);
+    } catch (err) {
+        console.error('Error fetching tasks:', err);
+        res.status(500).json({ error: 'Failed to fetch tasks' });
+    }
+};
+
+const getDateTasks = async (req, res) => {
+    const { id, date } = req.params;
+
+    if (!id || !date) {
+        return res.status(400).json({ error: 'Missing required path parameters: id and date' });
+    }
+
+    const query = `
+        SELECT 
+            em.task,
+            em.description,
+            em.status,
+            em.scheduled_date,
+            se.name,
+            se.type,
+            se.serial_number,
+            sm.name AS manager_name,
+            sm.email AS manager_email
+        FROM 
+            equipment_maintenance em
+        JOIN 
+            scompany_equipment se ON em.equipment_id = se.id
+        JOIN 
+            scompany_users su ON se.technician_id = su.id
+        JOIN 
+            scompany_users sm ON se.manager_id = sm.id
+        WHERE 
+            su.id = @id and em.scheduled_date = @date and em.status='Scheduled'
+
+    `;
+
+    try {
+        const request = new sql.Request();
+        const result = await request
+            .input('id', sql.Int, id)
+            .input('date', sql.Date, new Date(date))
+            .query(query);
+
+        res.status(200).json(result.recordset);
+    } catch (err) {
+        console.error('Error fetching tasks:', err);
+        res.status(500).json({ error: 'Failed to fetch tasks' });
+    }
+};
+
+module.exports = { getScheduledMaintenance ,getDetailTasks,getTasksByTechnician,getTaskCalendar,getDateTasks};

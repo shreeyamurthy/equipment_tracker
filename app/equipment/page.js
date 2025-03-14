@@ -32,24 +32,36 @@ const Equipment = () => {
       // Handle the schedule maintenance action here
       console.log(`Schedule maintenance for equipment ID: ${id}`);
     };
+
+    const handleAddEquipment = () => {
+      router.push('/equipment/add-equipment');
+    };
   
     return (
       <div>
         <Navbar />
         <div className="container mx-auto mt-8">
-          <div className="flex justify-center mb-4 space-x-4">
-            <label className="block text-white font-bold mb-2">Select Equipment Type</label>
-            <select
-              value={selectedType}
-              onChange={(e) => setSelectedType(e.target.value)}
-              className="text-black px-4 py-2 rounded hover:bg-blue-600"  style={{ backgroundColor: 'oklch(0.869 0.022 252.894)'}}
+          <div className="flex justify-between mb-4">
+            <div className="flex space-x-4">
+              <label className="block font-bold mb-2">Select Equipment Type</label>
+              <select
+                value={selectedType}
+                onChange={(e) => setSelectedType(e.target.value)}
+                className="text-black px-4 py-2 rounded hover:bg-blue-600"  style={{ backgroundColor: 'oklch(0.869 0.022 252.894)'}}
+              >
+                <option value="">All</option>
+                <option value="Laptop">Laptop</option>
+                <option value="Monitor">Monitor</option>
+                <option value="Mouse">Mouse</option>
+                <option value="Keyboard">Keyboard</option>
+              </select>
+            </div>
+            <button
+              onClick={handleAddEquipment}
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
             >
-              <option value="">All</option>
-              <option value="Laptop">Laptop</option>
-              <option value="Monitor">Monitor</option>
-              <option value="Mouse">Mouse</option>
-              <option value="Keyboard">Keyboard</option>
-            </select>
+              Add Equipment
+            </button>
           </div>
           <div className="w-3/4 mx-auto space-y-4">
             {equipment.map((item) => (
@@ -69,6 +81,5 @@ const Equipment = () => {
       </div>
     );
   };
-  
 
 export default Equipment;

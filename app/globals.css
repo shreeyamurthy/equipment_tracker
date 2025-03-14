@@ -2,7 +2,7 @@
 
 
 body {
-  background-color: oklch(0.446 0.043 257.281);
+  background-color: oklch(0.869 0.022 252.894);
 }
 
 .text-half-white {
@@ -19,4 +19,30 @@ body {
 
 .hover\:scale-105:hover {
   transform: scale(1.05);
+}
+
+.fc-daygrid-event.maintenance-dot {
+  background-color: red !important;
+  border-radius: 50%;
+  width: 6px;
+  height: 6px;
+  margin: auto;
+}
+
+.maintenance-dot {
+  background-color: blue !important;
+  border: none !important;
+}
+
+.custom-event {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%; /* Ensure the event spans the full height of the cell */
+}
+.event-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: blue; /* Default color */
 }

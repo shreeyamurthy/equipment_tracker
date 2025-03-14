@@ -1,9 +1,12 @@
 const express = require('express');
-const { submitMaintenanceLog, generateReport } = require('../controllers/maintenanceController');
+const { getScheduledMaintenance,getDetailTasks,getTasksByTechnician,getTaskCalendar ,getDateTasks } = require('../controllers/maintenanceController');
 const { authenticateToken, authorizeRole } = require('../middlewares/authMiddleware');
 const router = express.Router();
 
-router.post('/log', authenticateToken, authorizeRole(['Technician']), submitMaintenanceLog);
-router.get('/report', authenticateToken, authorizeRole(['Admin', 'Manager']), generateReport);
 
+router.get('/getScheduledMaintenance/:id',getScheduledMaintenance);
+router.get('/getDetailTasks/:id/:date',getDetailTasks);
+router.get('/getTasksByTechnician/:id',getTasksByTechnician);
+router.get('/getTaskCalendar/:id',getTaskCalendar);
+router.get('/getDateTasks/:id/:date',getDateTasks);
 module.exports = router;
